@@ -2,8 +2,8 @@ from .cell import Cell
 
 
 class WaterCell(Cell):
-    def __init__(self, row, col):
-        super().__init__(row, col, "water")
+    def __init__(self, row):
+        super().__init__(row, "water")
     def on_land(self, piece, state):
         state.send_to_rebirth(piece)
 

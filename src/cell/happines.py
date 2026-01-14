@@ -2,8 +2,8 @@ from .cell import Cell
 
 
 class HappinessCell(Cell):
-    def __init__(self, row, col):
-        super().__init__(row, col, "happiness")
+    def __init__(self, row,):
+        super().__init__(row, "happiness")
     def can_land(self, piece, state):
         return True
 

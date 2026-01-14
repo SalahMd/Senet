@@ -1,9 +1,7 @@
 class Cell:
-    def __init__(self, row, col, type="normal", value=None):
+    def __init__(self, row, type="normal"):
         self.row = row
-        self.col = col
         self.type = type 
-        self.value = value
         self.piece = None
 
 

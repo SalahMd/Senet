@@ -12,62 +12,83 @@ class Grid:
     def __init__(self):
         self.rows = 3
         self.cols = 10
-        self.grid = [[None for _ in range(self.cols)] for _ in range(self.rows)]
-        self.snake_path = []
+        self.cells = self.rows * self.cols
+
+        self.grid = [None for _ in range(self.cells)]
         self.pieces = []
-        self._generate_cells()
-        self._build_snake_path()
-        self._generate_pieces()
 
-    def _generate_cells(self):
-        idx = 1
-        for r in range(self.rows):
-            for c in range(self.cols):
+        self.generate_cells()
+        self.generate_pieces()
 
-                if idx == 16:
-                    cell = RebirthCell(r, c)
-                elif idx == 26:
-                    cell = HappinessCell(r, c)
-                elif idx == 27:
-                    cell = WaterCell(r, c)
-                elif idx == 28:
-                    cell = ThreeTruthsCell(r, c)
-                elif idx == 29:
-                    cell = ReAtoumCell(r, c)
-                elif idx == 30:
-                    cell = HorusCell(r, c)
-                else:
-                    cell = EmptyCell(r, c)
+    # -------------------------
+    # Generate cells (1D)
+    # -------------------------
+    def generate_cells(self):
+        for idx in range(self.cells):
+            pos = idx + 1  # game numbering (1 → 30)
 
-                self.grid[r][c] = cell
-                idx += 1
-
-
-    def _build_snake_path(self):
-        self.snake_path = []
-        for r in range(self.rows):
-            row = self.grid[r]
-            if r== 1:      
-                self.snake_path.extend(reversed(row))
+            if pos == 16:
+                cell = RebirthCell(idx)
+            elif pos == 26:
+                cell = HappinessCell(idx)
+            elif pos == 27:
+                cell = WaterCell(idx)
+            elif pos == 28:
+                cell = ThreeTruthsCell(idx)
+            elif pos == 29:
+                cell = ReAtoumCell(idx)
+            elif pos == 30:
+                cell = HorusCell(idx)
             else:
-                self.snake_path.extend(row)
+                cell = EmptyCell(idx)
 
-    def _generate_pieces(self):
+            self.grid[idx] = cell
+
+    # -------------------------
+    # Pieces
+    # -------------------------
+    def generate_pieces(self):
         for i in range(14):
             color = "BLACK" if i % 2 == 0 else "WHITE"
             piece = Piece(color, pos=i)
-            cell = self.snake_path[i]
-            cell.piece = piece
+            self.grid[i].piece = piece
             self.pieces.append(piece)
 
+    # ======================================================
+    # 1D → 2D (snake layout)
+    # ======================================================
+    def to_2d(self, idx):
+        row = idx // self.cols
+        col = idx % self.cols
 
+        if row % 2 == 1:
+            col = self.cols - 1 - col
+
+        return row, col
+
+    # ======================================================
+    # Print grid as 2D (VIEW ONLY)
+    # ======================================================
     def display(self):
         for r in range(self.rows):
-            row = self.grid[r]
+            row_cells = []
 
-            print("   ".join(
-                cell.piece.symbol() if cell.piece else cell.symbol()
-                for cell in row
-            ))
+            for c in range(self.cols):
+                idx = self.to_1d(r, c)
+                cell = self.grid[idx]
+
+                if cell.piece:
+                    row_cells.append(cell.piece.symbol())
+                else:
+                    row_cells.append(cell.symbol())
+
+            print("   ".join(row_cells))
             print()
 
+    # ======================================================
+    # 2D → 1D (snake layout)
+    # ======================================================
+    def to_1d(self, row, col):
+        if row % 2 == 1:
+            col = self.cols - 1 - col
+        return row * self.cols + col
