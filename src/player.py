@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
 
-
 class Player(ABC):
-    def __init__(self, name: str):
+    def __init__(self, name: str, color: str):
         self.name = name
-        self.pieces = [] 
+        self.color = color
+        self.pieces = []
+
     @abstractmethod
     def play(self, game_state):
-        """
-        Perform a move.
-        Must be implemented by subclasses.
-        """
         pass

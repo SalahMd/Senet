@@ -9,32 +9,24 @@ class Game:
         while not self.is_game_over():
             current_player = self.players[self.current_player_index]
             roll = self.dice.roll()
-            print(f"{current_player.name} rolled a {roll}")
-
-            # Check for special cell rules
-            for piece in current_player.pieces:
-                cell = self.board.grid[piece.pos]
-                if hasattr(cell, 'check'):
-                    cell.check(piece, roll, self.board, self)
+            print(f"\n{current_player.name} Turn")
+            print(f"Roll: {roll}")
+            piece_idx = current_player.play(self.get_game_state(roll))
             
-            # For simplicity, this assumes the player's `play` method returns the index of the piece to move.
-            # A real implementation would need more sophisticated logic for piece selection.
-            piece_to_move_idx = current_player.play(self.get_game_state(roll))
-            
-            if piece_to_move_idx is not None:
-                self.move_piece(piece_to_move_idx, roll)
-            
-            self.board.display() # Display board after each move
+            if piece_idx is not None:
+                self.move_piece(piece_idx, roll)
+            else:
+                print(f"{current_player.name} has no moves")
+            self.board.display() 
             self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
+
     def is_valid_move(self, piece, next_idx):
-        if next_idx >= len(self.board.grid):
-            return piece.passed_happiness
+        if next_idx >= 30:
+            return getattr(piece, 'passed_happiness', False)
 
-        happiness_cell_index = 25
-        if not piece.passed_happiness and next_idx > happiness_cell_index:
+        if piece.pos < 25 and next_idx > 25:
             return False
-
         next_cell = self.board.grid[next_idx]
         if next_cell.is_occupied() and next_cell.piece.color == piece.color:
             return False
@@ -44,71 +36,56 @@ class Game:
     def move_piece(self, piece_idx, roll):
         current_player = self.players[self.current_player_index]
         piece = self.get_piece_idx(piece_idx, current_player.pieces)
+        if not piece: return
 
-        if not piece:
-            print(f"No piece found at index {piece_idx} for {current_player.name}")
-            return
-
-        current_cell = self.board.grid[piece_idx]
         next_idx = piece_idx + roll
-
-        happiness_cell_index = 25
-        if not piece.passed_happiness and next_idx > happiness_cell_index:
-            print("Cannot move past House of Happiness without landing on it first")
-            return
-
-        if next_idx >= len(self.board.grid):
-            if not piece.passed_happiness:
-                print("Cannot move off board without passing House of Happiness")
-                return
-            # Piece moves off the board
-            print(f"{piece.color} piece moved off the board!")
+        current_cell = self.board.grid[piece_idx]
+        if next_idx >= 30:
+            print(f"🎉 {current_player.name}'s piece moved off the board")
             current_cell.piece = None
             current_player.pieces.remove(piece)
             return
 
         next_cell = self.board.grid[next_idx]
 
+        # Handle Swapping or Regular movement
         if next_cell.is_occupied():
             other_piece = next_cell.piece
             if other_piece.color != piece.color:
-                # Opponent's piece is here, swap them
-                print(f"Swapping with opponent's piece at {next_idx}")
-                
-                # Update positions
                 other_piece.pos = piece_idx
                 piece.pos = next_idx
-                
-                # Update cell references
                 current_cell.piece = other_piece
                 next_cell.piece = piece
-
-                # Find the opponent and update their piece's reference if they are tracked in lists
-                for player in self.players:
-                    if player.name != current_player.name:
-                        for p in player.pieces:
-                            if p is other_piece:
-                                # This is the piece, its pos is already updated
-                                break
-                        break
-            else:
-                # Cannot move to a cell occupied by own piece
-                print("Invalid move: cell occupied by own piece.")
-                return
         else:
-            # Cell is empty, just move the piece
             current_cell.piece = None
             next_cell.piece = piece
             piece.pos = next_idx
-        
-        # Handle special cell logic
-        if hasattr(next_cell, 'on_land'):
-            next_cell.on_land(piece, self.board)
+
+        # Update "Passed Happiness" status
+        if next_idx == 25:
+            piece.passed_happiness = True
+
+        # Handle House of Water (Square 27 - Index 26)
+        if next_idx == 26: 
+            self.handle_water_house(piece, next_idx)
+
+    def handle_water_house(self, piece, water_idx):
+        rebirth_idx = 14
+        water_cell = self.board.grid[water_idx]
+        rebirth_cell = self.board.grid[rebirth_idx]
+
+        if not rebirth_cell.is_occupied():
+            print("Returning to House of Rebirth")
+            water_cell.piece = None
+            rebirth_cell.piece = piece
+            piece.pos = rebirth_idx
+        else:
+            print("Piece is in water.")
 
     def is_game_over(self):
         for player in self.players:
             if not player.pieces:
-                print(f"Game over! {player.name} Win")
+                print(f"\n🏆 Game Over! Winner: {player.name}")
                 return True
         return False
 
@@ -117,10 +94,18 @@ class Game:
             "board": self.board,
             "roll": roll,
             "players": self.players,
-        }  
-    
+            "game_instance": self
+        }
+
     def get_piece_idx(self, piece_idx, pieces):
         for piece in pieces:
             if piece.pos == piece_idx:
                 return piece
         return None
+
+    def get_available_moves(self, player, roll):
+        legal_moves = []
+        for piece in player.pieces:
+            if self.is_valid_move(piece, piece.pos + roll):
+                legal_moves.append(piece.pos)
+        return sorted(legal_moves)
