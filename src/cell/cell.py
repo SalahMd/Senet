@@ -1,6 +1,6 @@
 class Cell:
-    def __init__(self, row, type="normal"):
-        self.row = row
+    def __init__(self, pos, type="normal"):
+        self.pos = pos
         self.type = type 
         self.piece = None
 

@@ -92,3 +92,10 @@ class Grid:
         if row % 2 == 1:
             col = self.cols - 1 - col
         return row * self.cols + col
+    def is_rebirth_empty(self):
+        return not self.grid[15].is_occupied()
+    def get_nearest_empty_cell_before_rebirth(self):
+        for i in range(14, -1, -1):
+            if not self.grid[i].is_occupied():
+                return i
+        return None
