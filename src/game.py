@@ -11,8 +11,7 @@ class Game:
             roll = self.dice.roll()
             print(f"\n{current_player.name} Turn")
             print(f"Roll: {roll}")
-            piece_idx = current_player.play(self.get_game_state(roll))
-            
+            piece_idx = current_player.play(self.get_game_state(roll))         
             if piece_idx is not None:
                 self.move_piece(piece_idx, roll)
             else:
@@ -24,7 +23,6 @@ class Game:
     def is_valid_move(self, piece, next_idx):
         if next_idx >= 30:
             return getattr(piece, 'passed_happiness', False)
-
         if piece.pos < 25 and next_idx > 25:
             return False
         next_cell = self.board.grid[next_idx]
@@ -80,8 +78,14 @@ class Game:
             rebirth_cell.piece = piece
             piece.pos = rebirth_idx
         else:
-            print("Piece is in water.")
+            print("Piece is in water")
+    def run_checks(self, player, roll):
+            # We iterate through the grid to find the player's pieces
+            for cell in self.board.grid:
+                if cell.piece and cell.piece.color == player.color:
 
+                    if hasattr(cell, 'check'):
+                        cell.check(cell.piece, roll, self.board, self)
     def is_game_over(self):
         for player in self.players:
             if not player.pieces:
@@ -104,8 +108,14 @@ class Game:
         return None
 
     def get_available_moves(self, player, roll):
-        legal_moves = []
-        for piece in player.pieces:
-            if self.is_valid_move(piece, piece.pos + roll):
-                legal_moves.append(piece.pos)
-        return sorted(legal_moves)
+            legal_moves = []
+            current_pieces = [cell.piece for cell in self.board.grid if cell.piece and cell.piece.color == player.color]    
+            for piece in current_pieces:
+                if piece.pos == 27 and roll != 3:
+                    continue 
+                if piece.pos == 28 and roll != 2:
+                    continue
+                if self.is_valid_move(piece, piece.pos + roll):
+                    legal_moves.append(piece.pos)
+                    
+            return sorted(legal_moves)

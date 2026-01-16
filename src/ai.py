@@ -8,6 +8,7 @@ class AI(Player):
         self.depth = depth
         # احتمالات رمي العصي الأربعة (حسب قواعد كندال)
         self.probs = {1: 0.25, 2: 0.375, 3: 0.25, 4: 0.0625, 5: 0.0625}
+        
 
     def play(self, game_state):
         # تنفيذ البحث عن أفضل حركة
@@ -15,6 +16,7 @@ class AI(Player):
         return move # يعيد رقم المربع (Index)
 
     def evaluate(self, game_instance):
+        
         # تابع التقييم (Heuristic) الذي يشرح "ذكاء" الـ AI
         score = 0
         # مكافأة للأحجار التي خرجت من اللوح (هدف الفوز)
@@ -43,7 +45,7 @@ class AI(Player):
         
         for m in moves:
             temp_game = copy.deepcopy(game_instance)
-            temp_game.move_piece(m, roll, silent=True)
+            temp_game.move_piece(m, roll)
             # الانتقال لطبقة الخصم (Min)
             score = self.expectiminimax(temp_game, self.depth - 1, False)
             if score > best_score:

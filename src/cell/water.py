@@ -19,6 +19,4 @@ class WaterCell(Cell):
             print(f"No empty cell found for {piece.color} piece from House of Water")
 
     def symbol(self):
-        if self.piece:
-            return "🌊"
         return "🌊"    

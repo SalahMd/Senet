@@ -4,12 +4,13 @@ class Human(Player):
     def play(self, game_state):
         roll = game_state["roll"]
         game_instance = game_state["game_instance"]        
+        
         available_moves = game_instance.get_available_moves(self, roll)
         
         if not available_moves:
-            print("No legal moves available")
+            print("No legal moves")
             return None
-        print(f"Your movable pieces are at squares: {[m + 1 for m in sorted(available_moves)]}")
+        print(f"Your moves are at squares: {[m + 1 for m in sorted(available_moves)]}")
         
         while True:
             try:

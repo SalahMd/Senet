@@ -8,7 +8,6 @@ def main():
     grid = Grid()
     dice = Dice()
     player1 = Human("Player 1", color="BLACK")
-    # يمكنك رفع الـ depth لزيادة ذكاء الـ AI (مثلاً depth=3)
     player2 = AI("AI Computer", color="WHITE", depth=2)
     
 

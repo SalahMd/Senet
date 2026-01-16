@@ -4,7 +4,7 @@ from .cell import Cell
 class HorusCell(Cell):
     def __init__(self, pos):
         super().__init__(pos, "horus")
-    def on_land(self, piece, board):
+    def on_land(self, piece):
         piece.on_horus = True
 
     def check(self, piece, roll, board, game):
@@ -21,14 +21,10 @@ class HorusCell(Cell):
                     board.grid[piece.pos].piece = None
                     board.grid[new_pos].piece = piece
                     piece.pos = new_pos
-                    print(f"{piece.color} piece moved to {new_pos} from House of Horus")
                 else:
-                    print(f"No empty cell found for {piece.color} piece from House of Horus")
+                    print(f"No empty cell found for {piece.color}")
 
-    def can_exit(self, roll):
-        return True
+
     
     def symbol(self):
-        if self.piece:
-            return "🦅"
         return " 🏁"
