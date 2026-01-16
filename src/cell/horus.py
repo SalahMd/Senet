@@ -4,10 +4,10 @@ from .cell import Cell
 class HorusCell(Cell):
     def __init__(self, pos):
         super().__init__(pos, "horus")
-    def on_land(self, piece):
+    def on_land(self, piece,board):
         piece.on_horus = True
 
-    def check(self, piece, roll, board, game):
+    def check(self, piece, roll, board, game, is_not_moved):
         if piece.on_horus:
             next_idx = piece.pos + roll
             if not game.is_valid_move(piece, next_idx):

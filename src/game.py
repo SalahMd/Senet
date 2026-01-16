@@ -4,21 +4,46 @@ class Game:
         self.board = board
         self.dice = dice
         self.current_player_index = 0
+        self.moved_piece = None  
 
     def start(self):
         while not self.is_game_over():
             current_player = self.players[self.current_player_index]
             roll = self.dice.roll()
-            print(f"\n{current_player.name} Turn")
-            print(f"Roll: {roll}")
-            piece_idx = current_player.play(self.get_game_state(roll))         
+            print(f"\n{current_player.name} Turn, Roll: {roll}")
+
+            self.moved_piece = None
+
+            piece_idx = current_player.play(self.get_game_state(roll))
             if piece_idx is not None:
                 self.move_piece(piece_idx, roll)
+ 
             else:
                 print(f"{current_player.name} has no moves")
-            self.board.display() 
+            for piece in current_player.pieces[:]:
+                self.check_special_states(piece, roll)   
+
+            self.board.display()
             self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
+    def check_special_states(self, piece, roll):
+        # Three Truths
+        if getattr(piece, "on_three_truths", False):
+            if self.board.grid[piece.pos].type == "truths":
+                print("on_three_truths")
+                cell = self.board.grid[piece.pos]
+                cell.check(piece, roll, self.board, self, piece != self.moved_piece)
+            else:
+                piece.on_three_truths = False
+
+        # Re-Atoum
+        if getattr(piece, "on_reatoum", False):
+            if self.board.grid[piece.pos].type == "re_aotum":
+                print("on_reatoum")
+                cell = self.board.grid[piece.pos]
+                cell.check(piece, roll, self.board, self, piece == self.moved_piece)
+            else:
+                piece.on_reatoum = False
 
     def is_valid_move(self, piece, next_idx):
         if next_idx >= 30:
@@ -28,44 +53,57 @@ class Game:
         next_cell = self.board.grid[next_idx]
         if next_cell.is_occupied() and next_cell.piece.color == piece.color:
             return False
-            
         return True
 
     def move_piece(self, piece_idx, roll):
         current_player = self.players[self.current_player_index]
         piece = self.get_piece_idx(piece_idx, current_player.pieces)
-        if not piece: return
 
-        next_idx = piece_idx + roll
-        current_cell = self.board.grid[piece_idx]
-        if next_idx >= 30:
-            print(f"🎉 {current_player.name}'s piece moved off the board")
+        if not piece:
+            print(f"No piece found at index {piece_idx} for {current_player.name}")
+            return
+
+        current_cell = self.board.grid[piece.pos]
+        next_idx = piece.pos + roll
+
+        happiness_index = 25
+        if not piece.passed_happiness and next_idx > happiness_index:
+            print("Cannot move after House of Happiness without landing on it first")
+            return
+        
+        if next_idx >= len(self.board.grid):
+            if not piece.passed_happiness:
+                print("Cannot move off board without passing House of Happiness")
+                return
+
+            print(f"{piece.color} piece moved off the board!")
             current_cell.piece = None
             current_player.pieces.remove(piece)
+            self.moved_piece = piece
             return
 
         next_cell = self.board.grid[next_idx]
-
-        # Handle Swapping or Regular movement
         if next_cell.is_occupied():
             other_piece = next_cell.piece
-            if other_piece.color != piece.color:
-                other_piece.pos = piece_idx
-                piece.pos = next_idx
-                current_cell.piece = other_piece
-                next_cell.piece = piece
+
+            if other_piece.color == piece.color:
+                print("Invalid move")
+                return
+
+            next_cell.piece = piece
+            current_cell.piece = other_piece
+
+            other_piece.pos = piece.pos
+            piece.pos = next_idx
         else:
             current_cell.piece = None
             next_cell.piece = piece
             piece.pos = next_idx
 
-        # Update "Passed Happiness" status
-        if next_idx == 25:
-            piece.passed_happiness = True
+        if hasattr(next_cell, "on_land"):
+            next_cell.on_land(piece, self.board)
 
-        # Handle House of Water (Square 27 - Index 26)
-        if next_idx == 26: 
-            self.handle_water_house(piece, next_idx)
+        self.moved_piece = piece
 
     def handle_water_house(self, piece, water_idx):
         rebirth_idx = 14
@@ -79,13 +117,15 @@ class Game:
             piece.pos = rebirth_idx
         else:
             print("Piece is in water")
-    def run_checks(self, player, roll):
-            # We iterate through the grid to find the player's pieces
-            for cell in self.board.grid:
-                if cell.piece and cell.piece.color == player.color:
 
-                    if hasattr(cell, 'check'):
-                        cell.check(cell.piece, roll, self.board, self)
+    def run_checks(self, player, roll):
+        for cell in self.board.grid:
+            if cell.piece and cell.piece.color == player.color:
+                if hasattr(cell, 'check'):
+                    is_not_moved = (cell.piece != self.moved_piece)
+                    cell.check(cell.piece, roll, self.board, self, is_not_moved)
+
+
     def is_game_over(self):
         for player in self.players:
             if not player.pieces:
@@ -108,14 +148,14 @@ class Game:
         return None
 
     def get_available_moves(self, player, roll):
-            legal_moves = []
-            current_pieces = [cell.piece for cell in self.board.grid if cell.piece and cell.piece.color == player.color]    
-            for piece in current_pieces:
-                if piece.pos == 27 and roll != 3:
-                    continue 
-                if piece.pos == 28 and roll != 2:
-                    continue
-                if self.is_valid_move(piece, piece.pos + roll):
-                    legal_moves.append(piece.pos)
-                    
-            return sorted(legal_moves)
+        legal_moves = []
+        current_pieces = [cell.piece for cell in self.board.grid if cell.piece and cell.piece.color == player.color]
+        for piece in current_pieces:
+            # Respect special cell exit rules
+            if piece.pos == 27 and roll != 3:
+                continue
+            if piece.pos == 28 and roll != 2:
+                continue
+            if self.is_valid_move(piece, piece.pos + roll):
+                legal_moves.append(piece.pos)
+        return sorted(legal_moves)
