@@ -8,7 +8,7 @@ def main():
     grid = Grid()
     dice = Dice()
     player1 = Human("Player 1", color="BLACK")
-    player2 = AI("AI Computer", color="WHITE", depth=2)
+    player2 = AI("AI Computer", color="WHITE")
     
 
     player1.pieces = [cell.piece for cell in grid.grid if cell.piece and cell.piece.color == "BLACK"]
