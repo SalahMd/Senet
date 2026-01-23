@@ -3,13 +3,13 @@ class Heuristic:
         self.player_color = player_color
         self.weights = {
             "piece_progression": 10,
-            "pieces_off_board": 500,
+            "pieces_off_board": 800,
             "house_of_happiness": 100,
             "house_of_water": -200,
             "house_of_rebirth": -150,
-            "three_truths": 120,
-            "re_atoum": 120,
-            "horus": 200,
+            "three_truths": 200,
+            "re_atoum": 200,
+            "horus": 300,
             "piece_safety": 50,
             "blocking": 30
         }
@@ -26,6 +26,7 @@ class Heuristic:
         score += self._evaluate_special_cells(board)
         score += self._evaluate_piece_safety(board)
         score += self._evaluate_blocking(board, opponent)
+        score += self._evaluate_future_risk(board, current_player)
         
         return score
 
@@ -50,8 +51,7 @@ class Heuristic:
         return score
 
     def _evaluate_pieces_off_board(self, player):
-        # The base number of pieces is 5, a player starts with 7 pieces
-        # 7 is the total number of pieces for each player
+
         return (7 - len(player.pieces)) * self.weights["pieces_off_board"]
 
     def _evaluate_special_cells(self, board):
@@ -73,47 +73,33 @@ class Heuristic:
 
     def _evaluate_piece_safety(self, board):
         score = 0
-        # iterate over all pieces of the current player
         for cell in board.grid:
             if cell.piece and cell.piece.color == self.player_color:
-                # check if the piece is safe
                 is_safe = self._is_piece_safe(cell.piece, board)
                 if is_safe:
                     score += self.weights["piece_safety"]
         return score
 
     def _is_piece_safe(self, piece, board):
-        # A piece is safe if it is on a special cell that is not the house of water
-        # or if it is protected by another piece of the same color.
-        
-        # Special cells are considered safe, except for the House of Water
-        if piece.pos in [25, 27, 28, 29]: # Happiness, Three Truths, Re-Atoum, Horus
+        if piece.pos in [25, 27, 28, 29]: 
             return True
-
-        # check for protection
-        # A piece is protected if there is another piece of the same color behind it
-        # in a position that can block an opponent's piece from landing on it.
-        for i in range(1, 5): # Check for potential threats from 1 to 4 squares away
+        for i in range(1, 5):
             if piece.pos - i >= 0:
                 prev_cell = board.grid[piece.pos - i]
                 if prev_cell.piece and prev_cell.piece.color == piece.color:
-                    return True # Protected by a piece behind it
+                    return True
         return False
 
     def _evaluate_blocking(self, board, opponent):
         score = 0
-        # iterate over all pieces of the opponent
         for cell in board.grid:
             if cell.piece and cell.piece.color == opponent.color:
-                # check if the opponent's piece is blocked
                 is_blocked = self._is_piece_blocked(cell.piece, board)
                 if is_blocked:
                     score += self.weights["blocking"]
         return score
 
     def _is_piece_blocked(self, piece, board):
-        # A piece is blocked if there are two or more pieces of the opponent
-        # in a row in front of it.
         for i in range(1, 3):
             if piece.pos + i < len(board.grid):
                 next_cell = board.grid[piece.pos + i]
@@ -122,3 +108,13 @@ class Heuristic:
             else:
                 return False
         return True
+    
+    def _evaluate_future_risk(self, board, player):
+        score = 0
+        for cell in board.grid:
+            if cell.piece and cell.piece.color == player.color:
+                if cell.piece.pos == 25:
+                    score -= 50  
+                if cell.piece.pos == 24:
+                    score -= 30  
+        return score
