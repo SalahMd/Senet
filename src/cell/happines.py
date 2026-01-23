@@ -16,12 +16,9 @@ class HappinessCell(Cell):
             else:
                 new_pos = board.get_nearest_empty_cell_before_rebirth()
 
-            if new_pos is not None:
-                board.grid[piece.pos].piece = None
-                board.grid[new_pos].piece = piece
-                piece.pos = new_pos
-            else:
-                print(f"No empty cell found for {piece.color}")
+            board.grid[piece.pos].piece = None
+            board.grid[new_pos].piece = piece
+            piece.pos = new_pos
 
 
     def symbol(self):

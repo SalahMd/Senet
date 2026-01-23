@@ -11,38 +11,42 @@ class Game:
             current_player = self.players[self.current_player_index]
             roll = self.dice.roll()
             print(f"\n{current_player.name} Turn, Roll: {roll}")
-
             self.moved_piece = None
 
             piece_idx = current_player.play(self.get_game_state(roll))
             if piece_idx is not None:
                 self.move_piece(piece_idx, roll)
- 
             else:
                 print(f"{current_player.name} has no moves")
             for piece in current_player.pieces[:]:
                 self.check_special_states(piece, roll)   
 
             self.board.display()
-            self.current_player_index = (self.current_player_index + 1) % len(self.players)
+            if self.current_player_index == 0:
+                self.current_player_index = 1
+            else:
+                self.current_player_index = 0
 
     def check_special_states(self, piece, roll):
-
         if getattr(piece, "on_three_truths", False):
             if self.board.grid[piece.pos].type == "truths":
-                print("on_three_truths")
                 cell = self.board.grid[piece.pos]
-                cell.check(piece, roll, self.board, self, piece != self.moved_piece)
+                cell.check(piece, roll, self.board, self, piece == self.moved_piece)
             else:
                 piece.on_three_truths = False
 
         if getattr(piece, "on_reatoum", False):
             if self.board.grid[piece.pos].type == "re_aotum":
-                print("on_reatoum")
                 cell = self.board.grid[piece.pos]
                 cell.check(piece, roll, self.board, self, piece == self.moved_piece)
             else:
                 piece.on_reatoum = False
+        if getattr(piece, "on_horus", False):
+            if self.board.grid[piece.pos].type == "horus":
+                cell = self.board.grid[piece.pos]
+                cell.check(piece, roll, self.board, self, piece == self.moved_piece)
+            else:
+                piece.on_horus = False        
 
     def is_valid_move(self, piece, next_idx):
         if next_idx >= 30:
@@ -91,6 +95,10 @@ class Game:
 
             other_piece.pos = piece.pos
             piece.pos = next_idx
+            if hasattr(next_cell, "on_land"):
+                next_cell.on_land(piece, self.board)
+            if hasattr(current_cell, "on_land"):
+                current_cell.on_land(other_piece, self.board)
         else:
             current_cell.piece = None
             next_cell.piece = piece

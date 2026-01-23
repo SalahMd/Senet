@@ -10,11 +10,9 @@ class WaterCell(Cell):
         else:
             new_pos = board.get_nearest_empty_cell_before_rebirth()
 
-        if new_pos is not None:
-            board.grid[piece.pos].piece = None
-            board.grid[new_pos].piece = piece
-            piece.pos = new_pos
-            print(f"{piece.color} piece moved to {new_pos} from House of Water")
+        board.grid[piece.pos].piece = None
+        board.grid[new_pos].piece = piece
+        piece.pos = new_pos
 
     def symbol(self):
         return "🌊"    

@@ -56,14 +56,14 @@ class Grid:
             self.pieces.append(piece)
 
 
-    def to_2d(self, idx):
-        row = idx // self.cols
-        col = idx % self.cols
+    # def to_2d(self, idx):
+    #     row = idx // self.cols
+    #     col = idx % self.cols
 
-        if row % 2 == 1:
-            col = self.cols - 1 - col
+    #     if row % 2 == 1:
+    #         col = self.cols - 1 - col
 
-        return row, col
+    #     return row, col
 
     def display(self):
         for r in range(self.rows):

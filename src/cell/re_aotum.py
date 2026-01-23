@@ -8,15 +8,12 @@ class ReAtoumCell(Cell):
         piece.on_reatoum = True
 
     def check(self, piece, roll, board, game,is_moved):
-        print("checking")
         if is_moved:
             return
-
         if not piece.on_reatoum:
             return
 
         if roll != 2:
-            print("sent")
             self._send_to_rebirth(piece, board)
             return
 
@@ -34,13 +31,10 @@ class ReAtoumCell(Cell):
         else:
             new_pos = board.get_nearest_empty_cell_before_rebirth()
 
-        if new_pos is not None:
-            piece.on_reatoum = False
-            board.grid[new_pos].piece = piece
-            piece.pos = new_pos
-            print(f"{piece.color} piece sent to Rebirth")
-        else:
-            print(f"No empty cell found for {piece.color} from Re-Atoum")
+        piece.on_reatoum = False
+        board.grid[new_pos].piece = piece
+        piece.pos = new_pos
+
 
     def can_exit(self, roll):
         return roll == 2

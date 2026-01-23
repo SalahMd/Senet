@@ -6,21 +6,26 @@ class Human(Player):
         game_instance = game_state["game_instance"]        
         
         available_moves = game_instance.get_available_moves(self, roll)
-        
-        if not available_moves:
+        if len(available_moves) == 0:
             print("No legal moves")
             return None
-        print(f"Your moves are at squares: {[m + 1 for m in sorted(available_moves)]}")
         
+        human_moves = []
+        for move in available_moves:
+            human_moves.append(move + 1)
+        human_moves.sort()
+        print("Your moves are at squares:", human_moves)
+
         while True:
-            try:
-                choice_str = input(f"Enter the square number (1-30) of the piece: ")
-                choice = int(choice_str) - 1 # Convert to 0-based index
+            choice_str = input("Enter the square number (1-30) of the piece: ")
+            
+            if choice_str.isdigit():
+                human_choice = int(choice_str)
+                choice = human_choice - 1 
                 
                 if choice in available_moves:
                     return choice
                 else:
-                    print(f"Invalid choice Please select from: {[m + 1 for m in sorted(available_moves)]}")
-            
-            except ValueError:
-                print("Invalid input. Please enter a number (1-30)")
+                    print("Invalid choice. Please select from:", human_moves)
+            else:
+                print("Invalid input. Please enter a number (1-30).")
