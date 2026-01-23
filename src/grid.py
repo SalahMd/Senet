@@ -20,12 +20,9 @@ class Grid:
         self.generate_cells()
         self.generate_pieces()
 
-    # -------------------------
-    # Generate cells (1D)
-    # -------------------------
     def generate_cells(self):
         for idx in range(self.cells):
-            pos = idx + 1  # game numbering (1 → 30)
+            pos = idx + 1
 
             if pos == 16:
                 cell = RebirthCell(idx)
@@ -44,19 +41,21 @@ class Grid:
 
             self.grid[idx] = cell
 
-    # -------------------------
-    # Pieces
-    # -------------------------
+
     def generate_pieces(self):
         for i in range(14):
             color = "BLACK" if i % 2 == 0 else "WHITE"
             piece = Piece(color, pos=i)
+            # if(i == 10 ):
+            #     self.grid[27].piece = piece
+            #     self.grid[27].piece.on_three_truths=True
+            #     self.grid[piece.pos].type = "truths"
+            #     self.pieces.append(piece)
+            #     continue
             self.grid[i].piece = piece
             self.pieces.append(piece)
 
-    # ======================================================
-    # 1D → 2D (snake layout)
-    # ======================================================
+
     def to_2d(self, idx):
         row = idx // self.cols
         col = idx % self.cols
@@ -66,9 +65,6 @@ class Grid:
 
         return row, col
 
-    # ======================================================
-    # Print grid as 2D (VIEW ONLY)
-    # ======================================================
     def display(self):
         for r in range(self.rows):
             row_cells = []
@@ -85,9 +81,7 @@ class Grid:
             print("   ".join(row_cells))
             print()
 
-    # ======================================================
-    # 2D → 1D (snake layout)
-    # ======================================================
+
     def to_1d(self, row, col):
         if row % 2 == 1:
             col = self.cols - 1 - col

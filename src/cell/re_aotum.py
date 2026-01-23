@@ -15,25 +15,20 @@ class ReAtoumCell(Cell):
         if not piece.on_reatoum:
             return
 
-        # ❌ Roll is not 2 → always rebirth
         if roll != 2:
             print("sent")
             self._send_to_rebirth(piece, board)
             return
 
-        # ✅ Roll is 2 and player moved this piece
         if game.moved_piece is piece:
             piece.on_reatoum = False
             return
 
-        # ⚠️ Roll is 2 but player did NOT move it
         self._send_to_rebirth(piece, board)
 
     def _send_to_rebirth(self, piece, board):
-        # Remove from current cell
         board.grid[piece.pos].piece = None
 
-        # Rebirth logic
         if board.is_rebirth_empty():
             new_pos = 15
         else:
@@ -43,7 +38,7 @@ class ReAtoumCell(Cell):
             piece.on_reatoum = False
             board.grid[new_pos].piece = piece
             piece.pos = new_pos
-            print(f"{piece.color} piece sent to Rebirth from Re-Atoum")
+            print(f"{piece.color} piece sent to Rebirth")
         else:
             print(f"No empty cell found for {piece.color} from Re-Atoum")
 

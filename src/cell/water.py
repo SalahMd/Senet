@@ -15,8 +15,6 @@ class WaterCell(Cell):
             board.grid[new_pos].piece = piece
             piece.pos = new_pos
             print(f"{piece.color} piece moved to {new_pos} from House of Water")
-        else:
-            print(f"No empty cell found for {piece.color} piece from House of Water")
 
     def symbol(self):
         return "🌊"    

@@ -27,7 +27,7 @@ class Game:
             self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
     def check_special_states(self, piece, roll):
-        # Three Truths
+
         if getattr(piece, "on_three_truths", False):
             if self.board.grid[piece.pos].type == "truths":
                 print("on_three_truths")
@@ -36,7 +36,6 @@ class Game:
             else:
                 piece.on_three_truths = False
 
-        # Re-Atoum
         if getattr(piece, "on_reatoum", False):
             if self.board.grid[piece.pos].type == "re_aotum":
                 print("on_reatoum")
@@ -73,10 +72,7 @@ class Game:
         
         if next_idx >= len(self.board.grid):
             if not piece.passed_happiness:
-                print("Cannot move off board without passing House of Happiness")
                 return
-
-            print(f"{piece.color} piece moved off the board!")
             current_cell.piece = None
             current_player.pieces.remove(piece)
             self.moved_piece = piece
@@ -115,8 +111,7 @@ class Game:
             water_cell.piece = None
             rebirth_cell.piece = piece
             piece.pos = rebirth_idx
-        else:
-            print("Piece is in water")
+
 
     def run_checks(self, player, roll):
         for cell in self.board.grid:
@@ -151,7 +146,6 @@ class Game:
         legal_moves = []
         current_pieces = [cell.piece for cell in self.board.grid if cell.piece and cell.piece.color == player.color]
         for piece in current_pieces:
-            # Respect special cell exit rules
             if piece.pos == 27 and roll != 3:
                 continue
             if piece.pos == 28 and roll != 2:
