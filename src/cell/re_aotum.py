@@ -8,12 +8,12 @@ class ReAtoumCell(Cell):
         piece.on_reatoum = True
 
     def check(self, piece, roll, board, game,is_moved):
-        if is_moved:
+        if  is_moved:
             return
         if not piece.on_reatoum:
             return
 
-        if roll != 2:
+        if roll != 2 :
             self._send_to_rebirth(piece, board)
             return
 

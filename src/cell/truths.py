@@ -7,12 +7,12 @@ class ThreeTruthsCell(Cell):
     def on_land(self, piece, board):
         piece.on_three_truths = True
 
-    def check(self, piece, roll, board, game, is_not_moved):
-        if not is_not_moved:
+    def check(self, piece, roll, board, game, is_move):
+        if is_move:
             return
 
         if piece.on_three_truths:
-            if roll != 3 or is_not_moved:
+            if roll != 3 :
                 if board.is_rebirth_empty():
                     new_pos = 15
                 else:
