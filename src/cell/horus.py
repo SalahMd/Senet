@@ -9,7 +9,7 @@ class HorusCell(Cell):
         piece.on_horus = True
 
     def check(self, piece, roll, board, game, is_moved):
-        if is_moved:
+        if not is_moved:
             return
         if not piece.on_horus:
             return
