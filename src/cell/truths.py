@@ -10,7 +10,6 @@ class ThreeTruthsCell(Cell):
     def check(self, piece, roll, board, game, is_move):
         if is_move:
             return
-
         if piece.on_three_truths:
             if roll != 3 :
                 if board.is_rebirth_empty():
