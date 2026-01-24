@@ -46,12 +46,6 @@ class Grid:
         for i in range(14):
             color = "BLACK" if i % 2 == 0 else "WHITE"
             piece = Piece(color, pos=i)
-            # if(i == 10 ):
-            #     self.grid[27].piece = piece
-            #     self.grid[27].piece.on_three_truths=True
-            #     self.grid[piece.pos].type = "truths"
-            #     self.pieces.append(piece)
-            #     continue
             self.grid[i].piece = piece
             self.pieces.append(piece)
 
@@ -86,8 +80,10 @@ class Grid:
         if row % 2 == 1:
             col = self.cols - 1 - col
         return row * self.cols + col
+    
     def is_rebirth_empty(self):
         return not self.grid[15].is_occupied()
+    
     def get_nearest_empty_cell_before_rebirth(self):
         for i in range(14, -1, -1):
             if not self.grid[i].is_occupied():
